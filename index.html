@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}</style>
 <title>Be My Girlfriend?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Nunito:wght@600;800&display=swap">
@@ -35,6 +42,8 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.heart{animation:none}#no.free{transition:none}.fall{display:none}}
 </style>
 
+</head>
+<body>
 <div id="garden" aria-hidden="true"></div>
 <main class="card" id="card">
   <div class="heart" aria-hidden="true">♥</div>
@@ -61,10 +70,12 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
   function draw(){
     garden.innerHTML='';
     const W=innerWidth,H=innerHeight,step=Math.max(70,Math.min(W,H)/5);
+    const cr=document.getElementById('card').getBoundingClientRect();
     for(let y=-20;y<H;y+=step){
       for(let x=-20;x<W;x+=step){
         const fx=x+Math.random()*step*0.7, fy=y+Math.random()*step*0.7;
-        const inCenter=Math.abs(fx-W/2)<Math.min(W*0.38,300) && Math.abs(fy-H/2)<Math.min(H*0.28,220);
+        const size0=70;
+        const inCenter=fx+size0>cr.left-20 && fx<cr.right+20 && fy+size0>cr.top-20 && fy<cr.bottom+60;
         if(inCenter || Math.random()<0.15) continue;
         const size=28+Math.random()*42;
         const wrap=document.createElement('div');
@@ -141,3 +152,6 @@ yes.addEventListener('click',()=>{
 });
 addEventListener('resize',()=>{if(no.isConnected&&no.classList.contains('free'))dodge();});
 </script>
+
+</body>
+</html>
