@@ -1,0 +1,143 @@
+<title>Be My Girlfriend?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Nunito:wght@600;800&display=swap">
+<style>
+/* Layout: one centered card on a blush ground; the No button breaks free and roams the whole screen */
+:root{
+  --bg:#ffe4ec; --bg2:#ffc9d8; --ink:#4a0f26; --soft:#8a3a5a;
+  --yes:#e8215c; --yes-ink:#fff; --no:#fff; --no-ink:#4a0f26;
+  --display:"Shrikhand",Georgia,serif; --body:"Nunito",system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:radial-gradient(circle at 50% 35%,var(--bg) 0%,var(--bg2) 100%);background-color:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden;padding-inline:16px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.card{display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center;max-width:32rem}
+.heart{font-size:clamp(56px,14vw,88px);line-height:1;animation:beat 1.2s ease-in-out infinite;color:var(--yes)}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.1)}}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,8.5vw,56px);line-height:1.1;margin:0;text-wrap:balance}
+.sub{margin:-12px 0 0;color:var(--soft);font-size:16px;min-height:1.4em}
+.row{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap}
+button{font-family:var(--body);font-weight:800;font-size:20px;border:0;border-radius:999px;padding:14px 34px;cursor:pointer;transition:transform .15s}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+#yes{background:var(--yes);color:var(--yes-ink);box-shadow:0 6px 18px rgba(232,33,92,.35);transform-origin:center}
+#yes:hover{filter:brightness(1.05)}
+#no{background:var(--no);color:var(--no-ink);box-shadow:0 4px 12px rgba(74,15,38,.15);z-index:5}
+#no.free{position:fixed;transition:left .25s ease,top .25s ease}
+.name{display:block;color:var(--yes)}
+.card{position:relative;z-index:2}
+#garden{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#garden svg{position:absolute;animation:sway 5s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+@media (prefers-reduced-motion:reduce){#garden svg{animation:none}}
+.done h1{font-size:clamp(40px,10vw,64px)}
+.fall{position:fixed;top:-40px;color:var(--yes);pointer-events:none;animation:fall linear forwards;z-index:1}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.heart{animation:none}#no.free{transition:none}.fall{display:none}}
+</style>
+
+<div id="garden" aria-hidden="true"></div>
+<main class="card" id="card">
+  <div class="heart" aria-hidden="true">♥</div>
+  <h1 id="q"><span class="name">Bianca,</span> do you wanna be my Girlfriend?</h1>
+  <p class="sub" id="sub"></p>
+  <div class="row" id="row">
+    <button id="yes">YES</button>
+    <button id="no">NO</button>
+  </div>
+</main>
+
+<script>
+// Background flowers: drawn as SVG so they look the same on every phone
+(function(){
+  const garden=document.getElementById('garden');
+  const palettes=[["#ff8fab","#ffd166"],["#ffffff","#ffb703"],["#f15b8a","#fff3b0"],["#c77dff","#ffe066"],["#ffb3c6","#e8215c"],["#ff6f91","#ffffff"]];
+  function flower(size,petals,c){
+    let p='';
+    for(let i=0;i<petals;i++){
+      p+=`<ellipse cx="50" cy="27" rx="13" ry="22" fill="${c[0]}" transform="rotate(${i*360/petals} 50 50)"/>`;
+    }
+    return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">${p}<circle cx="50" cy="50" r="12" fill="${c[1]}"/></svg>`;
+  }
+  function draw(){
+    garden.innerHTML='';
+    const W=innerWidth,H=innerHeight,step=Math.max(70,Math.min(W,H)/5);
+    for(let y=-20;y<H;y+=step){
+      for(let x=-20;x<W;x+=step){
+        const fx=x+Math.random()*step*0.7, fy=y+Math.random()*step*0.7;
+        const inCenter=Math.abs(fx-W/2)<Math.min(W*0.38,300) && Math.abs(fy-H/2)<Math.min(H*0.28,220);
+        if(inCenter || Math.random()<0.15) continue;
+        const size=28+Math.random()*42;
+        const wrap=document.createElement('div');
+        wrap.innerHTML=flower(size,5+Math.floor(Math.random()*2),palettes[Math.floor(Math.random()*palettes.length)]);
+        const svg=wrap.firstChild;
+        svg.style.left=fx+'px'; svg.style.top=fy+'px';
+        svg.style.opacity=(0.55+Math.random()*0.4).toFixed(2);
+        svg.style.animationDelay=(-Math.random()*5)+'s';
+        garden.appendChild(svg);
+      }
+    }
+  }
+  draw();
+  let t,lastW=innerWidth; addEventListener('resize',()=>{if(innerWidth===lastW)return;lastW=innerWidth;clearTimeout(t);t=setTimeout(draw,200);});
+})();
+
+const yes=document.getElementById('yes'), no=document.getElementById('no'), sub=document.getElementById('sub');
+const lines=["Nice try 😏","Nope, wrong button","Are you sure?","Think again…","The YES button is right there","You can't catch me","Just click YES 🥺","Still no? Really?"];
+let dodges=0, yesScale=1;
+
+function dodge(e){
+  if(e) e.preventDefault();
+  if(!no.classList.contains('free')){
+    const r=no.getBoundingClientRect();
+    no.style.left=r.left+'px'; no.style.top=r.top+'px';
+    no.classList.add('free'); no.offsetWidth;
+  }
+  const pad=16, w=no.offsetWidth, h=no.offsetHeight;
+  const maxX=innerWidth-w-pad, maxY=innerHeight-h-pad;
+  const cur=no.getBoundingClientRect(), yr=yes.getBoundingClientRect();
+  let x,y,tries=0;
+  do{
+    x=pad+Math.random()*Math.max(0,maxX-pad);
+    y=pad+Math.random()*Math.max(0,maxY-pad);
+    tries++;
+  }while(tries<30 && (Math.hypot(x-cur.left,y-cur.top)<120 ||
+        (x<yr.right+10 && x+w>yr.left-10 && y<yr.bottom+10 && y+h>yr.top-10)));
+  no.style.left=x+'px'; no.style.top=y+'px';
+  sub.textContent=lines[dodges%lines.length];
+  dodges++;
+  yesScale=Math.min(yesScale+0.06,2.8);
+  yes.style.transform='scale('+yesScale+')';
+}
+
+// Desktop: flee when the mouse gets close
+document.addEventListener('pointermove',e=>{
+  if(e.pointerType!=='mouse') return;
+  const r=no.getBoundingClientRect();
+  const dx=Math.max(r.left-e.clientX,0,e.clientX-r.right);
+  const dy=Math.max(r.top-e.clientY,0,e.clientY-r.bottom);
+  if(Math.hypot(dx,dy)<40) dodge();
+});
+// Phone: no hover, so jump the moment a finger touches it
+no.addEventListener('touchstart',dodge,{passive:false});
+no.addEventListener('pointerdown',dodge);
+no.addEventListener('click',dodge);
+no.addEventListener('focus',()=>{yes.focus();});
+
+yes.addEventListener('click',()=>{
+  no.remove();
+  document.getElementById('card').classList.add('done');
+  document.getElementById('q').textContent='YAAAY! 💖';
+  sub.textContent='I knew you would say yes 🥰';
+  document.getElementById('row').remove();
+  for(let i=0;i<40;i++){
+    const s=document.createElement('span');
+    s.className='fall'; s.textContent='♥';
+    s.style.left=Math.random()*100+'vw';
+    s.style.fontSize=(16+Math.random()*28)+'px';
+    s.style.animationDuration=(2.5+Math.random()*3)+'s';
+    s.style.animationDelay=(Math.random()*2)+'s';
+    document.body.appendChild(s);
+  }
+});
+addEventListener('resize',()=>{if(no.isConnected&&no.classList.contains('free'))dodge();});
+</script>
